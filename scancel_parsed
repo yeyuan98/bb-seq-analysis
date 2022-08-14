@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Simple script for parsing the jobid from snakemake so that only numerical part is retained.
+
+jobid_original=$1
+
+jobid_parsed=`echo ${jobid_original} | grep -P -o "[0-9]+"`
+
+scancel ${jobid_parsed}

@@ -1,0 +1,21 @@
+---
+# Barebone Snakemake Pipeline
+#   for paired-end Illumina sequencing
+# Configuration
+# Ye Yuan (yeyu@umich.edu)
+# August, 2022
+
+
+# Whether to work on `original` or `trimmed` fastq for processing steps
+trim_type: "trimmed"
+
+# Resource allocation
+resources:
+  mem_mb:
+    fastqc: 16000
+    trim: 16000
+  threads:
+    fastqc: 16
+    trim: 16
+
+# ------------ PIPELINE-SPECIFIC CONFIGURATIONS -----------
