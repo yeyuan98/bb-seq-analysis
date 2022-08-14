@@ -9,13 +9,30 @@
 # Whether to work on `original` or `trimmed` fastq for processing steps
 trim_type: "trimmed"
 
+# Genome index to use under processed/index
+#   will generate index according to workflow/align_makeIndex.smk if specified index does not exist.
+#   ... to configure index generation, modify workflow/align_makeIndex.smk.
+genome_name: "dm6"
+
+# Post-alignment filters
+post_align_filters:
+  # Configurable filter: by FLAG, by minimum quality, and removing mito reads
+  flag: 2  # Default 0x2 is proper pair
+  min_quality: 30
+  mito: "chrM"
+
+
 # Resource allocation
 resources:
   mem_mb:
     fastqc: 16000
     trim: 16000
+    align: 32000
+    summarize_postalign: 16000
   threads:
     fastqc: 16
     trim: 16
+    align: 32
+    summarize_postalign: 16
 
 # ------------ PIPELINE-SPECIFIC CONFIGURATIONS -----------

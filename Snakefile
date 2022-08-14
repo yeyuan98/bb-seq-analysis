@@ -16,14 +16,16 @@ samples = bb_core.list_samples()
 localrules: bb_all, multiqc, bb_notrim
 
 include: "workflow/multiqc.smk"
-include: "workflow/custom.smk"
+include: "workflow/align.smk"
+include: "workflow/align_makeIndex.smk"
+include: "workflow/postalign.smk"
 
 
 # ------ INPUT RULES ------
 rule bb_all:
     # all rule should include all TERMINAL steps (iter up till fastq)
     #   bb workflow provides only fastqc by default
-    # add in your custom pipeline in workflow/custom.smk and add the terminal step here
+    # add in your custom pipeline in workflow/*.smk, include them, and add the terminal step here
     input:
         expand(
             path.join("processed", "{sample}", config["trim_type"], "fastqc", "{end}_fastqc.html"),
@@ -54,7 +56,7 @@ rule bb_fastqc:
     threads:
         config["resources"]["threads"]["fastqc"]
     resources:
-        mem_mb=16000,
+        mem_mb=config["resources"]["mem_mb"]["fastqc"],
         time="1:00:00"
     params:
         out_dir = lambda wildcards, output: path.dirname(output[0])
@@ -76,7 +78,7 @@ rule bb_trim:
     threads:
         config["resources"]["threads"]["trim"]
     resources:
-        mem_mb=16000,
+        mem_mb=config["resources"]["mem_mb"]["trim"],
         time="3:00:00"
     params:
         out_dir = lambda wildcards, output: path.dirname(output[0]),
