@@ -1,9 +1,10 @@
 # Barebone Snakemake Pipeline
-#   for paired-end Illumina sequencing
+#   for ATAC-seq with paired-end sequencing
 # Snakemake main rule
 # Ye Yuan (yeyu@umich.edu)
 # August, 2022
 
+# IMPORTANT NOTE - This pipeline ONLY works on linux and (hopefully) macos.
 
 from workflow import bb_core
 from os import path

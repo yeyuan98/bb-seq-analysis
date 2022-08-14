@@ -1,6 +1,6 @@
 ---
 # Barebone Snakemake Pipeline
-#   for paired-end Illumina sequencing
+#   for ATAC-seq with paired-end sequencing
 # Configuration
 # Ye Yuan (yeyu@umich.edu)
 # August, 2022
