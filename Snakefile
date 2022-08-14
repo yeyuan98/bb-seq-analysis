@@ -6,7 +6,7 @@
 
 
 from workflow import bb_core
-from os import path, getcwd
+from os import path
 configfile: "config.yaml"
 ends = bb_core.get_paired_ends(verbose=True)
 ext = bb_core.get_ext(verbose=True)
