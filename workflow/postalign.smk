@@ -17,7 +17,7 @@ rule summarizeThenFilter_postalign:
         sorted=path.join("processed", "{sample}", config["trim_type"], "alignment", "sorted.bam"),
         sorted_idx=path.join("processed", "{sample}", config["trim_type"], "alignment", "sorted.bam.bai"),
         idxstat=path.join("processed", "{sample}", config["trim_type"], "alignment", "idxstat.txt"),
-        filtered=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.postpcr.bam")
+        filtered=temp(path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.prepcr.bam"))
     conda:
         "../env.yaml"
     threads:
@@ -41,19 +41,19 @@ rule summarizeThenFilter_postalign:
             samtools index -@ {threads} {output.sorted} {output.sorted_idx} >>{log} 2>&1
             now=$(date +"%r")
             echo "$now Getting idxstats of alignment..." >> {log}
-            samtools idxstats -@ {threads} {output.sorted} 1> {output.idxstat} 2>> {log}
+            samtools idxstats {output.sorted} 1> {output.idxstat} 2>> {log}
             now=$(date +"%r")
             echo "$now Filtering by flag and quality..." >> {log}
-            samtools view -@ {threads} -b -f {params.flag} -q {params.min_quality} {output.sorted} 1> {wildcards.sample}.intermediate.bam 2>> {log}
+            samtools view -@ {threads} -b -h -f {params.flag} -q {params.min_quality} {output.sorted} 1> {wildcards.sample}.intermediate.bam 2>> {log}
             now=$(date +"%r")
             echo "$now Filtering mito reads..." >> {log}
-            samtools view {wildcards.sample}.intermediate.bam | grep -Pv "\t{params.mito}\t" - | samtools view -b -o {output.filtered} - >>{log} 2>&1
+            samtools view -h {wildcards.sample}.intermediate.bam | grep -Pv "\t{params.mito}\t" - | samtools view -b -h -o {output.filtered} - >>{log} 2>&1
             rm {wildcards.sample}.intermediate.bam
         '''
 
 rule pcrDuplicateFilter_postalign:
     input:
-        path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.postpcr.bam")
+        path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.prepcr.bam")
     output:
         idxstat=path.join("processed", "{sample}", config["trim_type"], "alignment", "idxstat.filtered.txt"),
         metrics=path.join("processed", "{sample}", config["trim_type"], "alignment", "picard.metrics.txt"),

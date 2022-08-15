@@ -38,7 +38,7 @@ rule genome_download_filter:
         """
             echo "---------- GETTING SEQKIT ----------" >> {log}
             wget -a {log} {params.seqkit_url}
-            tar xzvf {params.seqkit_zip}
+            tar xzf {params.seqkit_zip}
             chmod +x {params.seqkit_bin}
             echo "---------- WGET GENOME ----------" >> {log}
             wget -a {log} {params.download_url}
@@ -60,7 +60,8 @@ rule bowtie2_index:
     input:
         get_file_from_url(genome_url)
     output:
-        directory(path.join("processed", "index", genome_name))
+        # This only lists the 1st index file created as an example
+        path.join("processed", "index", genome_name, genome_name + ".1.bt2")
     conda:
         "../env.yaml"
     log:
@@ -71,11 +72,10 @@ rule bowtie2_index:
     threads:
         16
     params:
-        index_base=lambda wildcards, output: path.join(output[0], genome_name),
+        index_base=lambda wildcards, output: path.join(path.dirname(output[0]), genome_name)
     shell:
         """
             echo "---------- BUILDING INDEX ----------" >> {log}
-            mkdir -p {output}
             gunzip -c {input} > genome.fa
             bowtie2-build -f --threads {threads} genome.fa {params.index_base} >> {log}
             rm genome.fa

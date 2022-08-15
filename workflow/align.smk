@@ -11,6 +11,7 @@ ends = bb_core.get_paired_ends()
 ext = bb_core.get_ext()
 
 rule bowtie2_align:
+    # Bowtie2 only outputs SAM.
     input:
         fastq_R1=path.join("processed", "{sample}", config["trim_type"], "fastq", ends[0]+ext),
         fastq_R2=path.join("processed","{sample}",config["trim_type"],"fastq",ends[1]+ext),
@@ -19,7 +20,7 @@ rule bowtie2_align:
     params:
         index_base=path.join("processed", "index", config["genome_name"], config["genome_name"])
     output:
-        path.join("processed", "{sample}", config["trim_type"], "alignment", "out.bam")
+        temp(path.join("processed", "{sample}", config["trim_type"], "alignment", "out.sam"))
     conda:
         "../env.yaml"
     threads:
@@ -31,4 +32,19 @@ rule bowtie2_align:
         path.join("processed", "{sample}", config["trim_type"], "logs", "align.log")
     shell:
         "bowtie2 -x {params.index_base} --very-sensitive --dovetail -X 1000 -p {threads} "+
-        "-1 {input.fastq_R1} -2 {input.fastq_R2} -b {output} >> {log}"
+        "-1 {input.fastq_R1} -2 {input.fastq_R2} -S {output} 2> {log}"
+
+rule samToBam_align:
+    input:
+        path.join("processed","{sample}",config["trim_type"],"alignment","out.sam")
+    output:
+        path.join("processed","{sample}",config["trim_type"],"alignment","out.bam")
+    conda:
+        "../env.yaml"
+    threads:
+        config["resources"]["threads"]["align"]
+    resources:
+        mem_mb=config["resources"]["mem_mb"]["align"],
+        time="3:00:00"
+    shell:
+        "samtools view -@ {threads} -h -b {input} > {output}"
