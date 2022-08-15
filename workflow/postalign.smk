@@ -9,6 +9,10 @@
 
 from os import path
 
+# Download path to histogram plotting routine and the final JAR name.
+histogram_plot_url="https://github.com/yeyuan98/sequencing_tools/raw/main/PEHistogram.jar"
+histogram_plot_jar="PEHistogram.jar"
+
 rule summarizeThenFilter_postalign:
     # Note - Picard MarkDuplicates is not multi-threaded; therefore, this filter step is separated in another rule.
     input:
@@ -57,7 +61,10 @@ rule pcrDuplicateFilter_postalign:
     output:
         idxstat=path.join("processed", "{sample}", config["trim_type"], "alignment", "idxstat.filtered.txt"),
         metrics=path.join("processed", "{sample}", config["trim_type"], "alignment", "picard.metrics.txt"),
-        filtered=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.bam")
+        filtered=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.bam"),
+        filtered_idx=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.bam.bai"),
+        histogram=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.histogram.png"),
+        histogram_data=path.join("processed", "{sample}", config["trim_type"], "alignment", "filtered.histogram.tab")
     conda:
         "../env.yaml"
     threads:
@@ -65,6 +72,9 @@ rule pcrDuplicateFilter_postalign:
     resources:
         mem_mb=20000,
         time="5:00:00"
+    params:
+        histogram_plot_url=histogram_plot_url,
+        histogram_plot_jar=histogram_plot_jar
     log:
         path.join("processed", "{sample}", config["trim_type"], "logs", "summarize_postalign.log")
     shell:
@@ -72,9 +82,20 @@ rule pcrDuplicateFilter_postalign:
             now=$(date +"%r")
             echo "$now Removing PCR duplicates..." >> {log}
             picard MarkDuplicates --INPUT {input} --METRICS_FILE {output.metrics} --OUTPUT {output.filtered} --REMOVE_DUPLICATES true
+            
+            now=$(date +"%r")
+            echo "$now Indexing filtered bam..." >> {log}
+            samtools index -@ {threads} {output.filtered} {output.filtered_idx} >>{log} 2>&1
+            
             now=$(date +"%r")
             echo "$now Getting idxstats of filtered alignment..." >> {log}
             samtools idxstats -@ {threads} {output.filtered} 1> {output.idxstat} 2>> {log}
+            
+            now=$(date +"%r")
+            echo "$now Plotting histogram of filtered data..." >> {log}
+            wget -q -nc {params.histogram_plot_url}
+            java -jar {params.histogram_plot_jar} -B {output.filtered} -I {output.filtered_idx} -l 0 -u 1000 -p {output.histogram} -t {output.histogram_data}
+            
             now=$(date +"%r")
             echo "$now DONE!" >> {log}
         '''
