@@ -15,10 +15,12 @@ rule multiqc_sample:
     params:
         out_dir = path.join("processed","{sample}",config["trim_type"]),
         fastqc = path.join("processed", "{sample}", config["trim_type"], "fastqc"),
-        logs = path.join("processed", "{sample}", config["trim_type"], "logs")
+        logs = path.join("processed", "{sample}", config["trim_type"], "logs"),
+        alignment = path.join("processed", "{sample}", config["trim_type"], "alignment"),
+        peak_calling = path.join("processed", "{sample}", config["trim_type"], "peak_calling")
     output:
         path.join("processed","{sample}",config["trim_type"],"multiqc_report.html")
     conda:
         "../env.yaml"
     shell:
-        "multiqc -o {params.out_dir} {params.fastqc} {params.logs}"
+        "multiqc --no-data-dir -o {params.out_dir} {params.fastqc} {params.logs} {params.alignment} {params.peak_calling}"

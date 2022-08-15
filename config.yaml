@@ -21,6 +21,15 @@ post_align_filters:
   min_quality: 30
   mito: "chrM"
 
+peak_calling:
+  # Configuring MACS2 callpeak
+  #   Effective genome size Galaxy references:
+  #     Human 2.7e9, Mouse 1.87e9, Fly 1.2e8, C. elegans 9e7
+  #   Shift and extension:
+  #     For PE50 use shift = -100, extension_size = 200
+  effective_genome_size: "1.2e8"
+  shift: "-100"
+  extension_size: "200"
 
 # Resource allocation
 resources:
@@ -29,10 +38,12 @@ resources:
     trim: 16000
     align: 32000
     summarize_postalign: 16000
+    peak_calling: 16000
   threads:
     fastqc: 16
     trim: 16
     align: 32
     summarize_postalign: 16
+    peak_calling: 1
 
 # ------------ PIPELINE-SPECIFIC CONFIGURATIONS -----------

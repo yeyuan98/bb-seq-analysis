@@ -19,6 +19,7 @@ include: "workflow/multiqc.smk"
 include: "workflow/align.smk"
 include: "workflow/align_makeIndex.smk"
 include: "workflow/postalign.smk"
+include: "workflow/callpeak.smk"
 
 
 # ------ INPUT RULES ------
@@ -26,10 +27,23 @@ rule bb_all:
     # all rule should include all TERMINAL steps (iter up till fastq)
     #   bb workflow provides only fastqc by default
     # add in your custom pipeline in workflow/*.smk, include them, and add the terminal step here
+    # ATAC-SEQ: ALL INPUT RULE ONLY GETS FILTERED BAM. TO CALL PEAKS, RUN RULE `callpeak`
     input:
         expand(
             path.join("processed", "{sample}", config["trim_type"], "fastqc", "{end}_fastqc.html"),
             sample=samples, end=ends
+        ),
+        expand(
+            path.join("processed","{sample}",config["trim_type"],"alignment","filtered.bam"),
+            sample=samples
+        )
+
+
+rule callpeak:
+    input:
+        expand(
+            path.join("processed","{sample}",config["trim_type"],"peak_calling","NA_peaks.xls"),
+            sample=samples
         )
 
 
