@@ -40,10 +40,13 @@ rule bb_all:
 
 
 rule callpeak:
+    # Run MACS2
+    # Also, conditionally run bdg2bw conversion
     input:
         expand(
-            path.join("processed","{sample}",config["trim_type"],"peak_calling","NA_peaks.xls"),
-            sample=samples
+            path.join("processed","{sample}",config["trim_type"],"peak_calling","{type}"),
+            sample=samples,
+            type=["NA_peaks.xls", "NA_treat_pileup.bw"] if config["peak_calling"]["convertBW"] else ["NA_peaks.xls"]
         )
 
 

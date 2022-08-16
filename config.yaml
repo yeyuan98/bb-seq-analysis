@@ -27,9 +27,11 @@ peak_calling:
   #     Human 2.7e9, Mouse 1.87e9, Fly 1.2e8, C. elegans 9e7
   #   Shift and extension:
   #     For PE50 use shift = -100, extension_size = 200
+  # You can control whether to run conversion from bedgraph to bigwig; TODO: CONFIGURE THE RULE IN `callpeak.smk`.
   effective_genome_size: "1.2e8"
   shift: "-100"
   extension_size: "200"
+  convertBW: true
 
 # Resource allocation
 resources:
